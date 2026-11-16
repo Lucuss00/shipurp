@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --wood:#7a4a2e;
+    --paper:#f6e6d0;
+    --paper2:#efd9bd;
+    --line:#a9a3b8;
+    --ink:#5b4a52;
+    --lh:38px;      /* ระยะบรรทัด: ทั้งเส้นและตัวหนังสือใช้ค่าเดียวกัน */
+    --top:104px;    /* จุดเริ่มบรรทัดแรกจากขอบบนกระดาษ */
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    min-height:100vh;
+    display:flex; justify-content:center; align-items:flex-start;
+    padding:36px 16px 60px;
+    background:
+      repeating-linear-gradient(95deg, rgba(0,0,0,.10) 0 2px, transparent 2px 9px, rgba(255,255,255,.05) 9px 11px, transparent 11px 26px),
+      repeating-linear-gradient(88deg, rgba(0,0,0,.08) 0 1px, transparent 1px 41px),
+      linear-gradient(120deg,#8a5636,#6d4128 60%,#7e4d30);
+    font-family:'Mali','Sarabun',cursive;
+  }
+  .desk{position:relative; width:100%; max-width:720px; padding-right:54px}
+  .stage{position:relative; perspective:2400px}
+
+  /* ================= หน้าปก ================= */
+  .cover{
+    position:absolute; z-index:20; inset:-22px -8px -8px -6px;
+    border:0; padding:0; margin:0; cursor:pointer; display:block;
+    border-radius:8px 22px 22px 8px;
+    background:
+      radial-gradient(ellipse at 50% 40%, rgba(255,255,255,.22), transparent 65%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,.20) 0 1px, transparent 1px 4px),
+      repeating-linear-gradient(90deg, rgba(200,110,135,.16) 0 1px, transparent 1px 4px),
+      #f3b6c5;
+    box-shadow: 0 20px 44px rgba(0,0,0,.5), inset 0 0 0 2px rgba(255,255,255,.35), inset 0 0 30px rgba(190,90,120,.25);
+    transform-origin:left center;
+    backface-visibility:hidden; -webkit-backface-visibility:hidden;
+    transition:transform 1.3s cubic-bezier(.6,.05,.3,1), box-shadow 1.3s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .cover:hover{filter:brightness(1.03)}
+  .cover:focus-visible{outline:3px solid #fff; outline-offset:3px}
+  /* สันปก */
+  .cover::before{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:54px;
+    background:linear-gradient(90deg,#d9889e,#e8a0b3 70%,#efb3c2);
+    border-right:2px dashed rgba(255,255,255,.7);
+    border-radius:8px 0 0 8px;
+    box-shadow:inset -6px 0 10px rgba(150,60,90,.25);
+  }
+  /* ยางรัด */
+  .cover::after{
+    content:""; position:absolute; right:44px; top:-2px; bottom:-2px; width:20px;
+    background:linear-gradient(90deg,#c9617d,#e07f98 45%,#c9617d);
+    box-shadow:2px 0 6px rgba(120,40,70,.35);
+  }
+  .cover svg{position:absolute; inset:0; width:100%; height:100%; padding:3% 9% 3% 11%}
+  .cover .float{animation:float 4s ease-in-out infinite; transform-origin:center}
+  @keyframes float{50%{transform:translateY(-6px)}}
+  .twinkle{animation:tw 2.4s ease-in-out infinite; transform-box:fill-box; transform-origin:center}
+  .twinkle:nth-of-type(2n){animation-delay:.8s}
+  .twinkle:nth-of-type(3n){animation-delay:1.5s}
+  @keyframes tw{50%{opacity:.35; transform:scale(.7)}}
+
+  .open .cover{transform:rotateY(-168deg); box-shadow:none; pointer-events:none}
+  .cover.gone{display:none}
+
+  /* ================= กระดาษ ================= */
+  .sheet{
+    position:relative; width:100%;
+    padding:var(--top) 40px 340px 92px;
+    background:
+      radial-gradient(circle at 22px 24px, var(--wood) 0 11px, rgba(0,0,0,.35) 11px 13px, transparent 13.5px) 0 0/100% 70px repeat-y,
+      radial-gradient(ellipse at 30% 20%, rgba(255,255,255,.35), transparent 60%),
+      radial-gradient(ellipse at 80% 90%, rgba(190,140,90,.25), transparent 55%),
+      linear-gradient(180deg,var(--paper),var(--paper2));
+    border-radius:6px 22px 14px 40px / 8px 14px 30px 10px;
+    box-shadow:0 2px 0 rgba(255,255,255,.4) inset, 0 18px 40px rgba(0,0,0,.45), 0 3px 6px rgba(0,0,0,.3);
+  }
+  /* เส้นบรรทัด — เริ่มที่ --top เดียวกับข้อความ */
+  .sheet::before{
+    content:""; position:absolute; left:70px; right:30px; top:var(--top); bottom:24px;
+    background:repeating-linear-gradient(to bottom, transparent 0 calc(var(--lh) - 1px), var(--line) calc(var(--lh) - 1px) var(--lh));
+    opacity:.8; pointer-events:none;
+  }
+  .sheet::after{
+    content:""; position:absolute; top:0; bottom:0; left:72px; width:2px;
+    background:linear-gradient(#f3a9b8,#ef9aab); opacity:.7;
+  }
+
+  /* ข้อความ: ทุกบรรทัดสูง = --lh แล้ววางบนเส้น */
+  .text{
+    position:relative; z-index:2;
+    font-size:21px; line-height:var(--lh); color:var(--ink);
+    margin:0;
+  }
+  .text p{margin:0 0 var(--lh)}
+  .text p.tight{margin-bottom:0}
+  .text p:last-child{margin-bottom:0}
+
+  .doodle{position:absolute; pointer-events:none}
+  .flower{right:60px; top:22px; width:150px}
+  .spk{left:96px; top:34px; width:44px}
+
+  .tape{position:absolute; z-index:5; box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .tape.top{
+    left:50%; top:-16px; width:190px; height:46px; margin-left:-95px; transform:rotate(-1deg);
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,.5) 0 4px, transparent 4px 12px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,.5) 0 4px, transparent 4px 12px),
+      #f1a9bb;
+    clip-path:polygon(0 4%,3% 0,6% 6%,9% 0,12% 5%,15% 0,100% 0,100% 100%,15% 100%,12% 95%,9% 100%,6% 94%,3% 100%,0 96%);
+  }
+
+  /* รูปแปะมุมขวาล่าง */
+  .photo{
+    position:absolute; z-index:4; right:34px; bottom:44px; width:330px; margin:0;
+    background:#fbfaf7; padding:9px 9px 34px;
+    box-shadow:0 8px 18px rgba(0,0,0,.35), 0 1px 3px rgba(0,0,0,.3);
+    transform:rotate(3deg);
+  }
+  .photo .img{position:relative; overflow:hidden; aspect-ratio:4/3; background:#7aa}
+  .photo img{display:block; width:100%; height:100%; object-fit:cover}
+  .photo .tape{
+    left:50%; margin-left:-48px; top:-18px; width:96px; height:34px; transform:rotate(-6deg);
+    background:repeating-linear-gradient(45deg, rgba(255,255,255,.35) 0 5px, transparent 5px 10px), #f0c796;
+  }
+  .tick{position:absolute; left:22.5%; top:79.5%; width:13%; height:17.5%; overflow:visible}
+  .tick path{
+    fill:none; stroke:#e0425e; stroke-width:9; stroke-linecap:round; stroke-linejoin:round;
+    stroke-dasharray:200; stroke-dashoffset:200;
+    filter:drop-shadow(0 1px 1px rgba(0,0,0,.25));
+  }
+  .open .tick path{animation:draw 1s 1.5s ease-out forwards}
+  @keyframes draw{to{stroke-dashoffset:0}}
+
+  /* แสตมป์ + หัวใจ มุมซ้ายล่าง */
+  .stamp-wrap{position:absolute; left:100px; bottom:56px; z-index:3; transform:rotate(-4deg); filter:drop-shadow(0 2px 3px rgba(0,0,0,.25))}
+  .stamp-wrap svg{display:block}
+  .heart{position:absolute; left:196px; bottom:50px; width:32px; z-index:3; transform:rotate(-8deg)}
+
+  /* ปากกา */
+  .pen{
+    position:absolute; z-index:6; right:-8px; top:-6px; width:74px; height:640px;
+    transform:rotate(-1.2deg); filter:drop-shadow(8px 10px 8px rgba(0,0,0,.35)); pointer-events:none;
+  }
+
+  @media (max-width:640px){
+    :root{--lh:34px; --top:92px}
+    body{padding:18px 8px 40px}
+    .desk{padding-right:34px}
+    .sheet{padding:var(--top) 22px 300px 58px}
+    .sheet::before{left:46px; right:18px}
+    .sheet::after{left:48px}
+    .text{font-size:17.5px}
+    .flower{right:34px; width:100px; top:26px}
+    .spk{left:60px; top:34px; width:34px}
+    .photo{width:240px; right:14px; bottom:34px}
+    .pen{width:52px; height:520px; right:-4px}
+    .stamp-wrap{left:56px; bottom:44px; transform:rotate(-4deg) scale(.75); transform-origin:left bottom}
+    .heart{left:120px; bottom:40px; width:26px}
+    .cover::before{width:36px}
+    .cover::after{right:30px; width:14px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .cover,.cover .float,.twinkle{animation:none; transition-duration:.01s}
+  }
+</style>
+</head>
+<body>
+<div class="desk" id="desk">
+
+  <svg class="pen" viewBox="0 0 74 640" aria-hidden="true">
+    <defs>
+      <linearGradient id="pk" x1="0" x2="1"><stop offset="0" stop-color="#e9a1b2"/><stop offset=".45" stop-color="#fbd3dc"/><stop offset="1" stop-color="#d98a9f"/></linearGradient>
+      <linearGradient id="cl" x1="0" x2="1"><stop offset="0" stop-color="#cfd3d6" stop-opacity=".9"/><stop offset=".5" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#b9bec2" stop-opacity=".9"/></linearGradient>
+    </defs>
+    <path d="M10 8 q-8 0 -8 14 v190 q0 10 8 10 h6 v-14 h-3 v-178 q0 -8 6 -8 h18 v-14z" fill="url(#pk)"/>
+    <rect x="14" y="0" width="46" height="150" rx="14" fill="url(#pk)"/>
+    <rect x="14" y="132" width="46" height="14" fill="#e08aa0"/>
+    <rect x="16" y="146" width="42" height="300" fill="url(#cl)"/>
+    <rect x="34" y="300" width="7" height="90" fill="#6b6a6a" opacity=".7"/>
+    <rect x="31" y="150" width="3" height="290" fill="#e5e8ea" opacity=".6"/>
+    <rect x="12" y="440" width="50" height="120" rx="10" fill="url(#pk)"/>
+    <g stroke="#c9778e" stroke-width="1.5" opacity=".7"><path d="M12 455h50M12 470h50M12 485h50M12 500h50M12 515h50M12 530h50M12 545h50"/></g>
+    <path d="M14 560 h46 l-6 42 q-17 10 -34 0z" fill="url(#cl)"/>
+    <path d="M26 602 q11 5 22 0 l-8 30 q-3 6 -6 0z" fill="#d7dadc"/>
+    <circle cx="37" cy="634" r="2.4" fill="#444"/>
+  </svg>
+
+  <div class="stage">
+
+    <!-- ===== หน้าปก (กดเพื่อเปิด) ===== -->
+    <button class="cover" id="cover" type="button" aria-label="เปิดไดอารี่">
+      <svg viewBox="-30 -25 480 690" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <defs>
+          <linearGradient id="pet" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8fb8f2"/><stop offset="1" stop-color="#b79cf0"/></linearGradient>
+          <symbol id="fl" viewBox="-30 -30 60 60">
+            <g fill="url(#pet)" stroke="#6f8fd8" stroke-width="1.2">
+              <ellipse cx="0" cy="-14" rx="10" ry="13"/>
+              <ellipse cx="0" cy="-14" rx="10" ry="13" transform="rotate(72)"/>
+              <ellipse cx="0" cy="-14" rx="10" ry="13" transform="rotate(144)"/>
+              <ellipse cx="0" cy="-14" rx="10" ry="13" transform="rotate(216)"/>
+              <ellipse cx="0" cy="-14" rx="10" ry="13" transform="rotate(288)"/>
+            </g>
+            <g stroke="#e8f0ff" stroke-width="1" opacity=".8" stroke-linecap="round">
+              <path d="M0 -6 V-20 M5.7 -1.9 L19 -6 M3.5 4.9 L11.7 16 M-3.5 4.9 L-11.7 16 M-5.7 -1.9 L-19 -6"/>
+            </g>
+            <circle r="6" fill="#f6cc4e" stroke="#d6a52c" stroke-width="1"/>
+            <circle r="2.3" fill="#8a5a2b"/>
+          </symbol>
+          <symbol id="spark" viewBox="-10 -10 20 20"><path d="M0 -9 L2.2 -2.2 L9 0 L2.2 2.2 L0 9 L-2.2 2.2 L-9 0 L-2.2 -2.2z" fill="#fbe08a" stroke="#d9b24a" stroke-width=".8" stroke-linejoin="round"/></symbol>
+        </defs>
+
+        <!-- กรอบด้ายเย็บ -->
+        <rect x="0" y="0" width="420" height="640" rx="26" fill="#fcf2e3" stroke="#e39ab0" stroke-width="3" stroke-dasharray="9 7" stroke-linecap="round"/>
+        <rect x="14" y="14" width="392" height="612" rx="18" fill="none" stroke="#f0c6d1" stroke-width="1.5"/>
+
+        <g class="float">
+          <!-- ก้านดอกไม้ -->
+          <g fill="none" stroke="#6fa862" stroke-width="4" stroke-linecap="round">
+            <path d="M210 520 C 210 430, 208 360, 210 280"/>
+            <path d="M210 520 C 190 450, 150 400, 118 350"/>
+            <path d="M210 520 C 235 450, 270 410, 302 360"/>
+            <path d="M210 520 C 195 480, 170 450, 140 440"/>
+            <path d="M210 520 C 228 485, 250 460, 280 448"/>
+          </g>
+          <!-- ใบ -->
+          <g fill="#8fc27d" stroke="#5f9a52" stroke-width="1.5">
+            <path d="M210 470 C 160 470, 130 500, 118 540 C 170 540, 200 510, 210 470z"/>
+            <path d="M210 450 C 262 448, 292 478, 304 520 C 250 520, 220 490, 210 450z"/>
+            <path d="M200 400 C 170 380, 150 380, 128 392 C 150 412, 178 412, 200 400z"/>
+            <path d="M222 380 C 250 360, 270 360, 292 372 C 270 392, 244 392, 222 380z"/>
+          </g>
+          <!-- ดอกไม้ -->
+          <g transform="translate(210 270) rotate(4) scale(2.1)"><use href="#fl" x="-30" y="-30" width="60" height="60"/></g>
+          <g transform="translate(118 345) rotate(-18) scale(1.8)"><use href="#fl" x="-30" y="-30" width="60" height="60"/></g>
+          <g transform="translate(302 355) rotate(16) scale(1.9)"><use href="#fl" x="-30" y="-30" width="60" height="60"/></g>
+          <g transform="translate(140 438) rotate(30) scale(1.4)"><use href="#fl" x="-30" y="-30" width="60" height="60"/></g>
+          <g transform="translate(282 446) rotate(-24) scale(1.4)"><use href="#fl" x="-30" y="-30" width="60" height="60"/></g>
+          <g transform="translate(210 425) rotate(10) scale(1.2)"><use href="#fl" x="-30" y="-30" width="60" height="60"/></g>
+          <!-- โบว์ -->
+          <g transform="translate(210 530)" fill="#f2a1b6" stroke="#d3708b" stroke-width="2" stroke-linejoin="round">
+            <path d="M0 0 C -30 -28, -62 -14, -54 14 C -48 34, -18 22, 0 0z"/>
+            <path d="M0 0 C 30 -28, 62 -14, 54 14 C 48 34, 18 22, 0 0z"/>
+            <path d="M-6 6 L-26 56 L-12 50 L-4 64 L4 10z"/>
+            <path d="M6 6 L26 56 L12 50 L4 64 L-4 10z"/>
+            <circle r="9"/>
+          </g>
+          <!-- ประกายในกรอบ -->
+          <use class="twinkle" href="#spark" x="40" y="70" width="34" height="34"/>
+          <use class="twinkle" href="#spark" x="350" y="110" width="26" height="26"/>
+          <use class="twinkle" href="#spark" x="320" y="560" width="30" height="30"/>
+          <use class="twinkle" href="#spark" x="60" y="540" width="22" height="22"/>
+        </g>
+
+        <!-- ประกายนอกกรอบ -->
+        <use class="twinkle" href="#spark" x="-50" y="40" width="30" height="30"/>
+        <use class="twinkle" href="#spark" x="440" y="300" width="26" height="26"/>
+        <use class="twinkle" href="#spark" x="-40" y="600" width="24" height="24"/>
+        <use class="twinkle" href="#spark" x="430" y="670" width="34" height="34"/>
+      </svg>
+    </button>
+
+    <!-- ===== หน้ากระดาษ ===== -->
+    <div class="sheet" role="article" aria-label="ข้อความในไดอารี่">
+      <div class="tape top"></div>
+
+      <svg class="doodle spk" viewBox="0 0 44 44" aria-hidden="true">
+        <path d="M24 4 l3 9 l9 3 l-9 3 l-3 9 l-3 -9 l-9 -3 l9 -3z" fill="#f4d776" stroke="#c8a24a" stroke-width="1.4" stroke-linejoin="round"/>
+        <path d="M8 28 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2z" fill="#f4d776" stroke="#c8a24a" stroke-width="1.2" stroke-linejoin="round"/>
+      </svg>
+
+      <svg class="doodle flower" viewBox="0 0 150 80" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 28 q10 -16 24 -10 q-4 14 -24 10z" fill="#c9e6a8" stroke="#7aa65a"/>
+        <g transform="translate(70 36)" stroke="#d8728b">
+          <g fill="#fbd3dc"><circle cx="0" cy="-13" r="8"/><circle cx="12" cy="-4" r="8"/><circle cx="8" cy="11" r="8"/><circle cx="-8" cy="11" r="8"/><circle cx="-12" cy="-4" r="8"/></g>
+          <circle r="6" fill="#f0c15a" stroke="#c8993a"/>
+        </g>
+        <path d="M112 40 q6 -14 20 -12 q-2 14 -20 12z" fill="#c9e6a8" stroke="#7aa65a"/>
+        <path d="M104 8 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2z" fill="#f4d776" stroke="#c8a24a"/>
+        <path d="M140 10 v50" stroke="#6a5a4c" stroke-dasharray="1 5"/>
+      </svg>
+
+      <div class="text">
+        <p>พี่เข้าใจแล้วก็ให้อภัยทุกอย่างแล้ว ตอนนี้เหลือแค่หนูที่ต้องให้อภัยตัวเองนะ</p>
+        <p>พี่รับความรักจากหนู แล้วก็รักหนูมากๆ</p>
+        <p>ทีนี้หนูต้องรักตัวเองพร้อมกับรักพี่ไปด้วย</p>
+        <p class="tight">ให้อภัยตัวเอง</p>
+        <p>กลับมาเป็นคนที่น่ารักเหมือนเดิม</p>
+        <p>น้องเปรมในความทรงจำพี่จะเป็นเด็กที่น่ารักตลอดไปถึงแม้อายุจะมากขึ้นขนาดไหนก็ตาม</p>
+        <p>ทุกอย่างไม่เป็นไรแล้ว</p>
+        <p>ขอบคุณสำหรับดอกไม้ค้าบ <span aria-hidden="true">♡</span></p>
+      </div>
+
+      <div class="stamp-wrap">
+        <svg width="82" height="100" viewBox="0 0 82 100" aria-hidden="true">
+          <path d="M4 4 h74 v92 h-74z" fill="#f7ecd9" stroke="#cdb99a" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <rect x="12" y="12" width="58" height="76" fill="#e4d0ee"/>
+          <g transform="translate(41 52)" stroke="#8a6a7a" stroke-width="1.4" fill="#fff" stroke-linecap="round">
+            <ellipse cx="-9" cy="-20" rx="5" ry="14" transform="rotate(-8)"/>
+            <ellipse cx="9" cy="-20" rx="5" ry="14" transform="rotate(8)"/>
+            <circle r="18"/>
+            <circle cx="-6" cy="-3" r="1.6" fill="#6a4a5a" stroke="none"/><circle cx="6" cy="-3" r="1.6" fill="#6a4a5a" stroke="none"/>
+            <circle cx="-11" cy="3" r="3.2" fill="#f9b8c4" stroke="none"/><circle cx="11" cy="3" r="3.2" fill="#f9b8c4" stroke="none"/>
+            <path d="M-3 2 q3 3 6 0" fill="none"/>
+          </g>
+        </svg>
+      </div>
+      <svg class="heart" viewBox="0 0 24 22" aria-hidden="true"><path d="M12 21 C2 13 1 6 6 3.5 C9 2 11 4 12 6 C13 4 15 2 18 3.5 C23 6 22 13 12 21z" fill="#f4a3b4" stroke="#d96d89" stroke-width="1.5" stroke-linejoin="round"/></svg>
+
+      <!-- รูปเดียว แปะมุมขวาล่าง -->
+      <figure class="photo">
+        <div class="tape"></div>
+        <div class="img">
+          <img src="flower.jpg" alt="พี่จะรับดอกไม้จากน้องเปรมมั้ย — รับ ✓">
+          <svg class="tick" viewBox="0 0 100 100" aria-hidden="true"><path d="M16 54 L40 80 L90 12"/></svg>
+        </div>
+      </figure>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    var desk=document.getElementById('desk'), cover=document.getElementById('cover');
+    cover.addEventListener('click',function(){
+      desk.classList.add('open');
+      setTimeout(function(){cover.classList.add('gone')},1400);
+    });
+  })();
+</script>
+</body>
+</html>
