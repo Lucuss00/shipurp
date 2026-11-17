@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=820, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>Diary</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;500&display=swap" rel="stylesheet">
@@ -18,17 +18,22 @@
   }
   *{box-sizing:border-box}
   html,body{margin:0}
-  body{
-    min-height:100vh;
-    display:flex; justify-content:center; align-items:flex-start;
-    padding:36px 16px 60px;
+  html{
+    min-height:100%;
     background:
       repeating-linear-gradient(95deg, rgba(0,0,0,.10) 0 2px, transparent 2px 9px, rgba(255,255,255,.05) 9px 11px, transparent 11px 26px),
       repeating-linear-gradient(88deg, rgba(0,0,0,.08) 0 1px, transparent 1px 41px),
-      linear-gradient(120deg,#8a5636,#6d4128 60%,#7e4d30);
+      linear-gradient(120deg,#8a5636,#6d4128 60%,#7e4d30) fixed;
+    background-color:#6d4128;
+  }
+  body{
+    min-height:100vh; min-height:100dvh; overflow:hidden;
+    display:flex; justify-content:center; align-items:center;
     font-family:'Mali','Sarabun',cursive;
   }
-  .desk{position:relative; width:100%; max-width:720px; padding-right:54px}
+  html{overflow:hidden}
+  #fit{position:relative; flex:none}
+  .desk{position:absolute; left:0; top:0; width:774px; padding-right:54px; transform-origin:0 0}
   .stage{position:relative; perspective:2400px}
 
 
@@ -184,7 +189,7 @@
 </style>
 </head>
 <body>
-<div class="desk" id="desk">
+<div id="fit"><div class="desk" id="desk">
 
   <svg class="pen" viewBox="0 0 74 640" aria-hidden="true">
     <defs>
@@ -336,11 +341,19 @@
       </figure>
     </div>
   </div>
-</div>
+</div></div>
 
 <script>
   (function(){
     var desk=document.getElementById('desk'), cover=document.getElementById('cover');
+    var fit=document.getElementById('fit'), W=774;
+    function resize(){
+      var h=desk.offsetHeight, s=Math.min(1,(innerWidth-30)/W,(innerHeight-70)/h);
+      desk.style.transform='scale('+s+')';
+      fit.style.width=(W*s)+'px'; fit.style.height=(h*s)+'px';
+    }
+    resize(); addEventListener('resize',resize); addEventListener('load',resize);
+    if(document.fonts&&document.fonts.ready) document.fonts.ready.then(resize);
     cover.addEventListener('click',function(){
       desk.classList.add('open');
       setTimeout(function(){cover.classList.add('gone')},1400);
