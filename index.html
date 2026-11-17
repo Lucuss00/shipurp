@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=820, initial-scale=1">
 <title>Diary</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;500&display=swap" rel="stylesheet">
@@ -31,9 +31,33 @@
   .desk{position:relative; width:100%; max-width:720px; padding-right:54px}
   .stage{position:relative; perspective:2400px}
 
+
+  /* ================= ตัวเล่ม (พื้นหลังที่กระดาษวางอยู่) ================= */
+  .book{
+    position:absolute; z-index:0; inset:-22px -14px -14px -14px;
+    border-radius:8px 22px 22px 8px;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,.20) 0 1px, transparent 1px 4px),
+      repeating-linear-gradient(90deg, rgba(200,110,135,.16) 0 1px, transparent 1px 4px),
+      #e9a3b5;
+    box-shadow:0 20px 44px rgba(0,0,0,.5), inset 0 0 0 2px rgba(255,255,255,.3);
+  }
+  .book::before{ /* สันเล่มด้านซ้าย */
+    content:""; position:absolute; left:0; top:0; bottom:0; width:14px;
+    background:linear-gradient(90deg,#d9889e,#e8a0b3);
+    border-right:2px dashed rgba(255,255,255,.7); border-radius:8px 0 0 8px;
+  }
+  .book::after{ /* ปกในสีครีม */
+    content:""; position:absolute; left:14px; right:6px; top:6px; bottom:6px;
+    background:linear-gradient(180deg,#fbe9ec,#f6d9df);
+    border-radius:4px 16px 16px 4px;
+    box-shadow:inset 0 0 18px rgba(190,90,120,.28);
+  }
+  .sheet{z-index:1}
+
   /* ================= หน้าปก ================= */
   .cover{
-    position:absolute; z-index:20; inset:-22px -8px -8px -6px;
+    position:absolute; z-index:20; inset:-22px -14px -14px -14px;
     border:0; padding:0; margin:0; cursor:pointer; display:block;
     border-radius:8px 22px 22px 8px;
     background:
@@ -154,23 +178,6 @@
     transform:rotate(-1.2deg); filter:drop-shadow(8px 10px 8px rgba(0,0,0,.35)); pointer-events:none;
   }
 
-  @media (max-width:640px){
-    :root{--lh:34px; --top:92px}
-    body{padding:18px 8px 40px}
-    .desk{padding-right:34px}
-    .sheet{padding:var(--top) 22px 300px 58px}
-    .sheet::before{left:46px; right:18px}
-    .sheet::after{left:48px}
-    .text{font-size:17.5px}
-    .flower{right:34px; width:100px; top:26px}
-    .spk{left:60px; top:34px; width:34px}
-    .photo{width:240px; right:14px; bottom:34px}
-    .pen{width:52px; height:520px; right:-4px}
-    .stamp-wrap{left:56px; bottom:44px; transform:rotate(-4deg) scale(.75); transform-origin:left bottom}
-    .heart{left:120px; bottom:40px; width:26px}
-    .cover::before{width:36px}
-    .cover::after{right:30px; width:14px}
-  }
   @media (prefers-reduced-motion:reduce){
     .cover,.cover .float,.twinkle{animation:none; transition-duration:.01s}
   }
@@ -198,6 +205,7 @@
   </svg>
 
   <div class="stage">
+    <div class="book" aria-hidden="true"></div>
 
     <!-- ===== หน้าปก (กดเพื่อเปิด) ===== -->
     <button class="cover" id="cover" type="button" aria-label="เปิดไดอารี่">
