@@ -31,7 +31,7 @@
     display:flex; justify-content:center; align-items:center;
     font-family:'Mali','Sarabun',cursive;
   }
-  html{overflow:hidden}
+  html{overflow:hidden; -webkit-text-size-adjust:none; text-size-adjust:none}
   #fit{position:relative; flex:none}
   .desk{position:absolute; left:0; top:0; width:774px; padding-right:54px; transform-origin:0 0}
   .stage{position:relative; perspective:2400px}
@@ -348,7 +348,7 @@
     var desk=document.getElementById('desk'), cover=document.getElementById('cover');
     var fit=document.getElementById('fit'), W=774;
     function resize(){
-      var h=desk.offsetHeight, s=Math.min(1,(innerWidth-30)/W,(innerHeight-70)/h);
+      var h=desk.offsetHeight, s=Math.min(1,(document.documentElement.clientWidth-30)/W,(window.innerHeight-70)/h);
       desk.style.transform='scale('+s+')';
       fit.style.width=(W*s)+'px'; fit.style.height=(h*s)+'px';
     }
