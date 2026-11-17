@@ -27,7 +27,7 @@
     background-color:#6d4128;
   }
   body{
-    min-height:100vh; min-height:100dvh; overflow:hidden;
+    position:fixed; inset:0; overflow:hidden;
     display:flex; justify-content:center; align-items:center;
     font-family:'Mali','Sarabun',cursive;
   }
@@ -106,7 +106,7 @@
   /* ================= กระดาษ ================= */
   .sheet{
     position:relative; width:100%;
-    padding:var(--top) 40px 340px 92px;
+    padding:var(--top) 40px 340px 92px; height:1052px; overflow:hidden;
     background:
       radial-gradient(circle at 22px 24px, var(--wood) 0 11px, rgba(0,0,0,.35) 11px 13px, transparent 13.5px) 0 0/100% 70px repeat-y,
       radial-gradient(ellipse at 30% 20%, rgba(255,255,255,.35), transparent 60%),
@@ -346,13 +346,17 @@
 <script>
   (function(){
     var desk=document.getElementById('desk'), cover=document.getElementById('cover');
-    var fit=document.getElementById('fit'), W=774;
+    var fit=document.getElementById('fit'), W=774, H=1052;
     function resize(){
-      var h=desk.offsetHeight, s=Math.min(1,(document.documentElement.clientWidth-30)/W,(window.innerHeight-70)/h);
+      var vv=window.visualViewport;
+      var vw=Math.min(window.innerWidth,document.documentElement.clientWidth||1e9,vv?vv.width:1e9);
+      var vh=Math.min(window.innerHeight,vv?vv.height:1e9);
+      var s=Math.min((vw-30)/W,(vh-70)/H);          /* ย่อ/ขยายให้พอดีจอเสมอ */
+      s=Math.max(.1,Math.min(s,1.6));
       desk.style.transform='scale('+s+')';
-      fit.style.width=(W*s)+'px'; fit.style.height=(h*s)+'px';
+      fit.style.width=(W*s)+'px'; fit.style.height=(H*s)+'px';
     }
-    resize(); addEventListener('resize',resize); addEventListener('load',resize);
+    resize(); addEventListener('resize',resize); addEventListener('orientationchange',resize); if(window.visualViewport) visualViewport.addEventListener('resize',resize); addEventListener('load',resize);
     if(document.fonts&&document.fonts.ready) document.fonts.ready.then(resize);
     cover.addEventListener('click',function(){
       desk.classList.add('open');
